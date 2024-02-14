@@ -9,9 +9,13 @@ type Post = {
     current: string
   }
 }
+export async function getStaticProps() {
+  return await client.fetch<Post[]>(`*[_type == "news"]`)
+}
 
-export async function PostIndex() {
-  const posts = await client.fetch<Post[]>(`*[_type == "news"]`)
+
+export async function HomePage(props) {
+  const {posts} = props
 
   return (
     <ul>
@@ -24,13 +28,4 @@ export async function PostIndex() {
   )
 }
 
-
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div>
-        <p>This my App</p>
-      </div>
-    </main>
-  );
-}
+export default HomePage
