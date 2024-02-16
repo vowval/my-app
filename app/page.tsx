@@ -1,31 +1,21 @@
-import Image from "next/image";
-import { client } from "../utils/sanity/client"
+// ./app/page.tsx
 
+import { SanityDocument } from "next-sanity";
+import { draftMode } from "next/headers";
 
-type Post = {
-  _id: string
-  title?: string
-  slug?: {
-    current: string
-  }
-}
-export async function getStaticProps() {
-  return await client.fetch<Post[]>(`*[_type == "news"]`)
-}
+import Posts from "@/components/Posts";
+import PostsPreview from "@/components/PostsPreview";
+import { loadQuery } from "@/sanity/lib/store";
+import { POSTS_QUERY } from "@/sanity/lib/queries";
 
+export default async function Page() {
+  const initial = await loadQuery<SanityDocument[]>(POSTS_QUERY, {}, {
+    perspective: draftMode().isEnabled ? "previewDrafts" : "published",
+  });
 
-export async function HomePage(props) {
-  const {posts} = props
-
-  return (
-    <ul>
-      {posts.map((post) => (
-        <li key={post._id}>
-          <a href={post?.slug.current}>{post?.title}</a>
-        </li>
-      ))}
-    </ul>
+  return draftMode().isEnabled ? (
+    <PostsPreview initial={initial} />
+  ) : (
+    <Posts posts={initial.data} />
   )
 }
-
-export default HomePage
